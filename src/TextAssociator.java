@@ -148,6 +148,7 @@ public class TextAssociator {
 	 * Note that only a source word can be removed by this method, not an association.
 	 */
 	public boolean remove(String word) {
+		remove word
 		return false;
 		//TODO: Implement as explained in spec
 	}
