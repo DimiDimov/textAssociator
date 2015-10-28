@@ -13,7 +13,8 @@ public class TextAssociator {
 	private WordInfoSeparateChain[] table;
 	private int size;
 	
-	/* INNER CLASS
+	/** 
+	 * INNER CLASS
 	 * Represents a separate chain in your implementation of your hashing
 	 * A WordInfoSeparateChain is a list of WordInfo objects that have all
 	 * been hashed to the same index of the TextAssociator
@@ -71,7 +72,7 @@ public class TextAssociator {
 	public TextAssociator() {
 		size = 1000;
 		table = new WordInfoSeparateChain[size];
-
+		
 		//TODO: Implement as explained in spec
 	}
 	
@@ -81,19 +82,29 @@ public class TextAssociator {
 	 * Returns True if this word is successfully added
 	 */
 	public boolean addNewWord(String word) {
-
+		
 		int index = hashString(word);
 		WordInfo newWord = new WordInfo(word);
 		
 		if (table[index] == null) {
 			table[index] = new WordInfoSeparateChain();
 		}
-
 		
 		if (table[index].size() > 5) {
 			expandTable();
 		}
-		return table[index].add(newWord);
+		
+        if (getWordInfo(index, word) == null) {
+        	return table[index].add(newWord);
+        	
+        }
+        return false;
+		
+//		if (!table[index].getElements().contains(newWord)) {
+//			System.out.println("actually false? " + !table[index].getElements().contains(newWord));
+//			return table[index].add(newWord);
+//		}
+//		return false;
 		//TODO: check twice?
 		//TODO: check for same word
 		
@@ -103,22 +114,26 @@ public class TextAssociator {
 	
 	private void expandTable() {
 		size *= 10;
-		table = new WordInfoSeparateChain[size];
-		for (int i = 0; i < table.length; i++) {
-			WordInfoSeparateChain bucket = table[i];
+		WordInfoSeparateChain[] tempTable = new WordInfoSeparateChain[size];
+		for (int i = 0; i < table.length; i++) { // iterate through original table
+			WordInfoSeparateChain bucket = table[i]; // 
 			
 			//For each separate chain, grab each individual WordInfo
-			for (WordInfo curr : bucket.getElements()) {
-				int index = hashString(curr.getWord());
-				if (table[index] == null) {
-					table[index] = new WordInfoSeparateChain();
+			if () {
+				for (WordInfo curr : bucket.getElements()) { // iterate through chain
+					int index = hashString(curr.getWord()); // calculate new index
+					if (table[index] == null) {
+						table[index] = new WordInfoSeparateChain(); // create new chain
+					}
+					addNewWord(curr);
 				}
 			}
 		}
+		table = tempTable;
 	}
 	
 	private int hashString(String word) {
-		return word.hashCode() % size;
+		return Math.abs(word.hashCode() % size);
 	}
 	
 	/* Adds an association between the given words. Returns true if association correctly added, 
@@ -127,16 +142,11 @@ public class TextAssociator {
 	 */
 	public boolean addAssociation(String word, String association) {
 		int index = hashString(word);
-		List<WordInfo> list = table[index].getElements();
-		for (WordInfo w : list) {
-			if (w.getWord().equals(word)) {
-				if (w.getAssociations().contains(association)) {
-					return false;
-				}
-				w.addAssociation(association);
-				return true;
+		WordInfo wi = getWordInfo(index, word);
+		if (wi != null) {
+			if (!wi.getAssociations().contains(association)) {
+				return wi.addAssociation(association);
 			}
-
 		}
 		return false;
 		//TODO: Implement as explained in spec
@@ -149,6 +159,10 @@ public class TextAssociator {
 	 */
 	public boolean remove(String word) {
 		int index = hashString(word);
+        WordInfo wi = getWordInfo(index, word);
+		if (wi != null) {
+			return table[index].remove(wi);
+		}
 		return false;
 		//TODO: Implement as explained in spec
 	}
@@ -158,10 +172,24 @@ public class TextAssociator {
 	 * Returns null if the given String does not exist in the TextAssociator
 	 */
 	public Set<String> getAssociations(String word) {
-		return null;
-		//TODO: Implement as explained in spec
+		int index = hashString(word);
+        WordInfo wi = getWordInfo(index, word);
+        if (wi != null) {
+        	return wi.getAssociations();
+        }
+        return null;
 	}
 	
+	private WordInfo getWordInfo(int index, String word) {
+		WordInfoSeparateChain chain = table[index];
+		List<WordInfo> list = chain.getElements();
+		for (WordInfo w : list) {
+			if (w.getWord().equals(word)) {
+				return w;
+			}
+		}
+		return null;
+	}
 	
 	/* Prints the current associations between words being stored
 	 * to System.out
