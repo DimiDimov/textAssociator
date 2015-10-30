@@ -1,9 +1,11 @@
 /** 
- * CSE 373 Starter Code
- * @author Kevin Quinn
+ * @author Dimi Dimov
+ * @author Darren Hou
+ * CSE 373 A, Fall 2015
+ * Assignment #3
+ * 10/30/15
  * 
  * TextAssociator represents a collection of associations between words.
- * See write-up for implementation details and hints
  */
 
 import java.util.ArrayList;
@@ -76,7 +78,7 @@ public class TextAssociator {
 	
 	
 	/**
-	 * Creates a new TextAssociator without any associations 
+	 * Creates a new TextAssociator without any associations, with a starting size of 997
 	 */
 	public TextAssociator() {
 		size = 997;
@@ -85,11 +87,11 @@ public class TextAssociator {
 		//TODO: Implement as explained in spec
 	}
 	
-	
 	/**
-	 * Adds a word with no associations to the TextAssociator 
-	 * Returns False if this word is already contained in your TextAssociator ,
-	 * Returns True if this word is successfully added
+	 * Adds a String word with no associations to the TextAssociator.
+	 * 
+	 * @param word	String to be added
+	 * @return		True if word is added successfully, False otherwise
 	 */
 	public boolean addNewWord(String word) {
 		
@@ -124,7 +126,8 @@ public class TextAssociator {
 	
 	
 	/**
-	 * Expands the table size
+	 * Expands the table size by a factor of 5 and copies over all elements, rehashing 
+	 * them appropriately in the process
 	 */
 	private void expandTable() {
 		size *= 5;
@@ -165,7 +168,7 @@ public class TextAssociator {
 	}
 	
 	/**
-	 * Hashes a String word.
+	 * Hashes a String word
 	 * 
 	 * @param word	The String to be hashed
 	 * @return		The hash as an int
@@ -192,29 +195,31 @@ public class TextAssociator {
 			}
 		}
 		return false;
-		//TODO: Implement as explained in spec
 	}
 	
 	
 	/**
-	 * Remove the given word from the TextAssociator, returns false if word 
-	 * was not contained, returns true if the word was successfully removed.
+	 * Remove the given word from the TextAssociator.
 	 * Note that only a source word can be removed by this method, not an association.
+	 * 
+	 * @param 	word	String to be removed from the TextAssociator
+	 * @return			True if word was removed successfully, false otherwise
 	 */
 	public boolean remove(String word) {
 		int index = hashString(word);
-        WordInfo wi = getWordInfo(index, word);
+		WordInfo wi = getWordInfo(index, word);
 		if (wi != null) {
 			return table[index].remove(wi);
 		}
 		return false;
-		//TODO: Implement as explained in spec
 	}
 	
-	
 	/**
-	 * Returns a set of all the words associated with the given String  
-	 * Returns null if the given String does not exist in the TextAssociator
+	 * Returns a set of associations of a given word
+	 * 
+	 * @param 	word	String to get associations of
+	 * @return			A Set<String> all the words associated with the given String, or null 
+	 * 					if the given String does not exist in the TextAssociator
 	 */
 	public Set<String> getAssociations(String word) {
 		int index = hashString(word);
@@ -225,6 +230,14 @@ public class TextAssociator {
 		return null;
 	}
 	
+	/**
+	 * Returns the WordInfo object from the table's given index that represents a given word
+	 * 
+	 * @param index		The location of the word's chain in the table, if it exists
+	 * @param word		String to get the WordInfo of
+	 * @return			WordInfo object of the passed word, or null if the word is not in the 
+	 * 					chain
+	 */
 	private WordInfo getWordInfo(int index, String word) {
 		WordInfoSeparateChain chain = table[index];
 		if (chain != null) {
@@ -240,18 +253,18 @@ public class TextAssociator {
 	
 	/**
 	 * Prints the current associations between words being stored
-	 * to System.out
+	 * to System.out in a way that is easy on the eyes
 	 */
 	public void prettyPrint() {
 		System.out.println("Current number of elements : " + size);
 		System.out.println("Current table size: " + table.length);
 		
-		//Walk through every possible index in the table
+		// Walk through every possible index in the table
 		for (int i = 0; i < table.length; i++) {
 			if (table[i] != null) {
 				WordInfoSeparateChain bucket = table[i];
 				
-				//For each separate chain, grab each individual WordInfo
+				// For each separate chain, grab each individual WordInfo
 				for (WordInfo curr : bucket.getElements()) {
 					System.out.println("\tin table index, " + i + ": " + curr);
 				}
