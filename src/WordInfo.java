@@ -31,7 +31,7 @@ public class WordInfo {
 	}
 	
 	// Creates a new WordInfo with the given source word and an existing set of associations
-	public void WordInfo(String word, Set<String> associations) {
+	public WordInfo(String word, Set<String> associations) {
 		this.word = word;
 		this.associations = associations;
 	}

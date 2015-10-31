@@ -17,7 +17,7 @@ import java.util.Set;
  * 
  * This Client program is dependent on TextAssociator
  */
-public class ThesuarusClient {
+public class ThesaurusClient {
 	
 	//Path to desired thesaurus file to read
 	public final static String THESAURUS_FILE = "large_thesaurus.txt";
@@ -39,7 +39,7 @@ public class ThesuarusClient {
 				sc.addAssociation(currWord, words[i].trim());
 			}
 		}
-		Scanner scan= new Scanner(System.in);
+		Scanner scan = new Scanner(System.in);
 		String inputString = "";
 		Random rand = new Random();
 		while (true) {
