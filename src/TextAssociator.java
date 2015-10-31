@@ -1,6 +1,6 @@
 /** 
- * @author Dimi Dimov
- * @author Darren Hou
+ * @author Dimi Dimov 1322926
+ * @author Darren Hou 1330362
  * CSE 373 A, Fall 2015
  * Assignment #3
  * 10/30/15
@@ -15,6 +15,10 @@ import java.util.Set;
 public class TextAssociator {
 	private WordInfoSeparateChain[] table;
 	private int size;
+	
+	public static final int INITIAL_SIZE = 23;
+	public static final int RESIZE_FACTOR = 2;
+	public static final int LOAD_THRESHOLD = 2;
 	
 	/**
 	 * INNER CLASS
@@ -78,13 +82,11 @@ public class TextAssociator {
 	
 	
 	/**
-	 * Creates a new TextAssociator without any associations, with a starting size of 997
+	 * Creates a new TextAssociator without any associations, with a starting size of 23
 	 */
 	public TextAssociator() {
-		size = 997;
+		size = INITIAL_SIZE;
 		table = new WordInfoSeparateChain[size];
-		
-		//TODO: Implement as explained in spec
 	}
 	
 	/**
@@ -95,76 +97,68 @@ public class TextAssociator {
 	 */
 	public boolean addNewWord(String word) {
 		
+		boolean addedSuccessfully = false;
 		int index = hashString(word);
 		WordInfo newWord = new WordInfo(word);
 		
-		if (table[index] == null) {
+		// makes WordInfoSeparateChain at index if it doesn't already exist
+		if (table[index] == null) { 
 			table[index] = new WordInfoSeparateChain();
 		}
 		
-		if (table[index].size() > 5) {
-			expandTable();
+		//checks if word isn't already in a WordInfo, adds 
+		if (getWordInfo(index, word) == null) { 
+			table[index].add(newWord);
+			addedSuccessfully = true;
 		}
 		
-		if (getWordInfo(index, word) == null) {
-			return table[index].add(newWord);
+		//if the WordInfoSeperateChain has more WordInfo's than the load threshold, resize 
+		// hashtable
+		if (table[index].size() > LOAD_THRESHOLD) { 
+			table = expandTable(table);
+		}
 			
-		}
-		return false;
-		
-//		if (!table[index].getElements().contains(newWord)) {
-//			System.out.println("actually false? " + !table[index].getElements().contains(newWord));
-//			return table[index].add(newWord);
-//		}
-//		return false;
-		//TODO: check twice?
-		//TODO: check for same word
-		
-		
-		//TODO: Implement as explained in spec
+		return addedSuccessfully;
 	}
 	
 	
 	/**
-	 * Expands the table size by a factor of 5 and copies over all elements, rehashing 
-	 * them appropriately in the process
+	 * Expands the passed table size by a the resize factor and copies over all elements, 
+	 * rehashing them appropriately in the process
+	 * 
+	 * @param table		A WordInfoSeparateChain[] to be resized
+	 * @return 			A temporary table containing all the WordInfo elements of the passed
+	 * 					table
 	 */
-	private void expandTable() {
-		size *= 5;
+	private WordInfoSeparateChain[] expandTable(WordInfoSeparateChain[] table) {
+		size *= RESIZE_FACTOR;
 		WordInfoSeparateChain[] tempTable = new WordInfoSeparateChain[size];
-		for (int i = 0; i < table.length; i++) { // iterate through original table
-			WordInfoSeparateChain chain = table[i]; // 
-			
-			//For each separate chain, grab each individual WordInfo
+		
+		// Walk through every possible index in the table
+		for (WordInfoSeparateChain chain : table) { 
 			if (chain != null) {
-				for (WordInfo curr : chain.getElements()) { // iterate through chain
-					int newIndex = hashString(curr.getWord()); // calculate new index
-					if (tempTable[newIndex] == null) {
-						tempTable[newIndex] = new WordInfoSeparateChain(); // create new chain
-					}
+				// For each separate chain, grab each individual WordInfo
+				for (WordInfo wordInfo : chain.getElements()) {  
+					String word = wordInfo.getWord();
+					int newIndex = hashString(word);
 					
-					//
-					WordInfo newWord = curr;
-					
-					if (tempTable[newIndex] == null) {
+					//checks if WordInfoSeparateChain is already created at table index, 
+					// if not creates one
+					if (tempTable[newIndex] == null) {        
 						tempTable[newIndex] = new WordInfoSeparateChain();
 					}
 					
-					if (tempTable[newIndex].size() > 5) {
-						expandTable();
-					}
+					tempTable[newIndex].add(wordInfo);
 					
-					tempTable[newIndex].add(newWord);
-//					for (String association : newWord.getAssociations()) {
-//						addAssociation(newWord.getWord(), association);
-//					}
-					
-					
+					//check if table needs to be resized because WordInfoChain
+					//has more wordInfo's than load threshold
+					if (tempTable[newIndex].size() > LOAD_THRESHOLD) { 
+						tempTable = expandTable(tempTable);            
+					}					
 				}
 			}
-		}
-		System.out.println(tempTable.length);
-		table = tempTable;
+		}	
+		return tempTable;
 	}
 	
 	/**
@@ -190,7 +184,8 @@ public class TextAssociator {
 		int index = hashString(word);
 		WordInfo wi = getWordInfo(index, word);
 		if (wi != null) {
-			if (!wi.getAssociations().contains(association)) {
+			//if association isn't already in WordInfo, add it
+			if (!wi.getAssociations().contains(association)) {  
 				return wi.addAssociation(association);
 			}
 		}
@@ -207,8 +202,10 @@ public class TextAssociator {
 	 */
 	public boolean remove(String word) {
 		int index = hashString(word);
-		WordInfo wi = getWordInfo(index, word);
-		if (wi != null) {
+		
+		//uses helper method to get the wordInfo using index and string
+		WordInfo wi = getWordInfo(index, word); 
+		if (wi != null) {	//checks if wordInfo is null, if not, removes it
 			return table[index].remove(wi);
 		}
 		return false;
@@ -223,8 +220,10 @@ public class TextAssociator {
 	 */
 	public Set<String> getAssociations(String word) {
 		int index = hashString(word);
-		WordInfo wi = getWordInfo(index, word);
-		if (wi != null) {
+		
+		//uses helper method to get the wordInfo using index and string
+		WordInfo wi = getWordInfo(index, word); 
+		if (wi != null) {	//checks if wordInfo is null, if not, returns its associations.
 			return wi.getAssociations();
 		}
 		return null;
@@ -241,13 +240,15 @@ public class TextAssociator {
 	private WordInfo getWordInfo(int index, String word) {
 		WordInfoSeparateChain chain = table[index];
 		if (chain != null) {
-			List<WordInfo> list = chain.getElements();
-			for (WordInfo w : list) {
-				if (w.getWord().equals(word)) {
+			//goes through each WordInfo in chain at table index given
+			for (WordInfo w : chain.getElements()) { 
+				//finds word in WordInfo, then returns that WordInfo
+				if (w.getWord().equals(word)) { 
 					return w;
 				}
 			}
 		}
+
 		return null;
 	}
 	
